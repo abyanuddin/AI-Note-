@@ -61,7 +61,7 @@ npx prisma migrate dev
 npm run dev
 ```
 
-The app will be available at [http://localhost:3000](http://localhost:3000).
+The app will be available at [(https://synthr.abacusai.app/)].
 
 ## Environment variables
 
