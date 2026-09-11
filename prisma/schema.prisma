@@ -1,0 +1,140 @@
+generator client {
+    provider = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+    output = "/home/ubuntu/meetmind/nextjs_space/node_modules/.prisma/client"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  meetings      Meeting[]
+  documents     Document[]
+  notes         ComposerNote[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Meeting {
+  id              String           @id @default(cuid())
+  title           String           @default("Untitled Meeting")
+  date            DateTime         @default(now())
+  duration        Int?             // duration in seconds
+  status          String           @default("draft") // draft, processing, completed
+  transcript      String?          @db.Text
+  rawTranscript   String?          @db.Text
+  executiveSummary String?         @db.Text
+  keyPoints       String?          @db.Text
+  decisions       String?          @db.Text
+  openQuestions   String?          @db.Text
+  followUps       String?          @db.Text
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actionItems     ActionItem[]
+  meetingDocs     MeetingDocument[]
+  notes           ComposerNote[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId])
+}
+
+model ActionItem {
+  id          String  @id @default(cuid())
+  task        String
+  assignee    String?
+  dueDate     String?
+  priority    String  @default("Medium") // High, Medium, Low
+  completed   Boolean @default(false)
+  meetingId   String
+  meeting     Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+}
+
+model Document {
+  id              String           @id @default(cuid())
+  title           String
+  fileName        String
+  contentType     String
+  cloudStoragePath String
+  isPublic        Boolean          @default(false)
+  extractedText   String?          @db.Text
+  category        String?          @default("General")
+  fileSize        Int?             // bytes
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meetingDocs     MeetingDocument[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId])
+}
+
+model MeetingDocument {
+  id         String   @id @default(cuid())
+  meetingId  String
+  documentId String
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, documentId])
+}
+
+model ComposerNote {
+  id        String   @id @default(cuid())
+  title     String   @default("Untitled Note")
+  content   String?  @db.Text
+  meetingId String?
+  meeting   Meeting? @relation(fields: [meetingId], references: [id], onDelete: SetNull)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
