@@ -8,7 +8,7 @@ then let the AI **transcribe** the audio, generate structured **summaries**
 and extract **action items** with assignees, due dates and priorities. A built-in
 **Smart Note Composer** (rich-text editor with an *Ask AI* panel) lets you blend your
 own writing with AI-generated content drawn from your meetings and your personal
-**Document Library** of research papers and reference PDFs — so every note is grounded
+**Document Library** of research papers and reference PDFs, so every note is grounded
 in the full context of what was discussed and uploaded.
 
 ## Features
